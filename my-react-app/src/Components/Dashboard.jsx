@@ -76,7 +76,7 @@ const [colors, setColors] = useState({
 
   const menuItems = [
     { key: "1", label: "Dashboard", icon: <DashboardOutlined /> },
-    { key: "2", label: "Analyzies", icon: <SettingOutlined /> },
+    { key: "2", label: "Settings", icon: <SettingOutlined /> },
     { key: "3", label: "Reports", icon: <LogoutOutlined /> },
   ];
 
