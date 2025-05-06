@@ -17,55 +17,79 @@ const Legend = ({ map }) => {
       const layers = map.getLayers().getArray();
 
       layers.forEach((layer) => {
-        // Skip base layer
         if (layer instanceof TileLayer) return;
 
-        // Handle vector layers
-        if (layer instanceof VectorLayer) {
-          const title = layer.get("title") || "Untitled Layer";
+        const title = layer.get("title") || "Untitled Layer";
+
+        // Handle Building Layers
+        if (title.toLowerCase().includes("building")) {
+          const source = layer.getSource();
+          if (source) {
+            const features = source.getFeatures();
+            const typeColorMap = new Map();
+
+            features.forEach((feature) => {
+              const name = feature.get("name");
+              if (!name) return;
+
+              // Get dynamic style
+              const styleFn = layer.getStyle();
+              if (typeof styleFn === "function") {
+                const style = styleFn(feature, 1);
+                const color =
+                  style?.getFill()?.getColor() ||
+                  style?.getStroke()?.getColor() ||
+                  "#ccc";
+                typeColorMap.set(name, color);
+              }
+            });
+
+            typeColorMap.forEach((color, name) => {
+              items.push({
+                title: name,
+                color,
+                isBuildingType: true,
+              });
+            });
+          }
+        } else if (layer instanceof VectorLayer) {
+          // Non-building vector layer style
           const style = layer.getStyle();
+          let color = "#ccc";
 
           if (style instanceof Style) {
-            items.push({
-              title,
-              color:
-                style.getFill()?.getColor() ||
-                style.getStroke()?.getColor() ||
-                "#ccc",
-            });
+            color =
+              style.getFill()?.getColor() ||
+              style.getStroke()?.getColor() ||
+              "#ccc";
           } else if (typeof style === "function") {
-            // Handle style functions by getting first feature's style
             const source = layer.getSource();
             if (source && source.getFeatures().length > 0) {
-              const feature = source.getFeatures()[0];
-              const featureStyle = style(feature, 1);
-              if (featureStyle) {
-                items.push({
-                  title,
-                  color:
-                    featureStyle.getFill()?.getColor() ||
-                    featureStyle.getStroke()?.getColor() ||
-                    "#ccc",
-                });
-              }
+              const featureStyle = style(source.getFeatures()[0], 1);
+              color =
+                featureStyle?.getFill()?.getColor() ||
+                featureStyle?.getStroke()?.getColor() ||
+                "#ccc";
             }
           }
+
+          items.push({
+            title,
+            color,
+            isBuildingType: false,
+          });
         }
       });
 
       setLegendItems(items);
     };
 
-    // Initial extraction
     extractLegendItems();
 
-    // Listen for layer changes
+    // React to layer changes
     const layers = map.getLayers();
     layers.on("change:length", extractLegendItems);
-
-    return () => {
-      layers.un("change:length", extractLegendItems);
-    };
+    return () => layers.un("change:length", extractLegendItems);
   }, [map]);
 
   return (
@@ -86,41 +110,36 @@ const Legend = ({ map }) => {
       }}
     >
       <h3 style={{ margin: "0 0 10px 0", fontSize: "16px" }}>Legend</h3>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "8px",
-        }}
-      >
-        {legendItems.length > 0 ? (
-          legendItems.map((item, index) => (
+      {legendItems.length > 0 ? (
+        legendItems.map((item, index) => (
+          <div
+            key={index}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              marginBottom: "6px",
+            }}
+          >
             <div
-              key={index}
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
+                width: "20px",
+                height: "20px",
+                backgroundColor: item.color,
+                border: "1px solid #999",
+                borderRadius: "3px",
               }}
-            >
-              <div
-                style={{
-                  width: "20px",
-                  height: "20px",
-                  backgroundColor: item.color,
-                  border: "1px solid #999",
-                  borderRadius: "3px",
-                }}
-              />
-              <span style={{ fontSize: "14px" }}>{item.title}</span>
-            </div>
-          ))
-        ) : (
-          <div style={{ color: "#666", fontStyle: "italic", padding: "5px 0" }}>
-            No legend items available
+            />
+            <span style={{ fontSize: "14px" }}>
+              {item.isBuildingType ? `🏢 ${item.title}` : item.title}
+            </span>
           </div>
-        )}
-      </div>
+        ))
+      ) : (
+        <div style={{ color: "#666", fontStyle: "italic" }}>
+          No legend items available
+        </div>
+      )}
     </div>
   );
 };
