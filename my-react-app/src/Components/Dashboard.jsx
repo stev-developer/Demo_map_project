@@ -96,9 +96,9 @@ const [colors, setColors] = useState({
         breakpoint="lg"
         collapsedWidth="0"
         style={{
-          backgroundColor: "#007bff", // blue background
-          borderRight: "1px solid #4da6ff", // light blue border
-          boxShadow: "4px 0 12px rgba(0,0,0,0.1)", // box shadow
+          backgroundColor: colors.sidebarBackground,
+          borderRight: `1px solid ${colors.borderColor}`,
+          boxShadow: "4px 0 12px rgba(0, 0, 0, 0.15)", // stronger and wider shadow
         }}
       >
         <div
@@ -106,7 +106,7 @@ const [colors, setColors] = useState({
             height: 64,
             margin: 16,
             fontWeight: "bold",
-            color: "#ffffff", // white text
+            color: colors.sidebarItemColor,
             textAlign: "center",
             fontSize: 20,
             lineHeight: "64px",
@@ -128,12 +128,21 @@ const [colors, setColors] = useState({
               key={key}
               icon={React.cloneElement(icon, {
                 style: {
-                  color: "#ffffff", // white icon
+                  color:
+                    selectedKey === key
+                      ? colors.sidebarItemSelectedColor // white for selected icon
+                      : colors.sidebarItemColor, // default icon color
                 },
               })}
               style={{
-                backgroundColor: selectedKey === key ? "#4da6ff" : "#007bff", // light blue if selected
-                color: "#ffffff", // white text
+                backgroundColor:
+                  selectedKey === key
+                    ? colors.sidebarItemSelectedBGColor
+                    : colors.sidebarItemBGColor,
+                color:
+                  selectedKey === key
+                    ? colors.sidebarItemSelectedColor // white text for selected
+                    : colors.sidebarItemColor, // default text color
               }}
             >
               {label}
@@ -147,17 +156,17 @@ const [colors, setColors] = useState({
         {/* Header */}
         <Header
           style={{
-            background: "#007bff", // blue background
+            background: colors.headerBackground,
             padding: "0 24px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            borderBottom: "1px solid #4da6ff", // light blue border
-            boxShadow: "4px 0 12px rgba(0,0,0,0.1)", // box shadow
+            borderBottom: `1px solid ${colors.borderColor}`,
+            boxShadow: "4px 0 14px rgba(0, 0, 0, 0.15)", // stronger and wider shadow
           }}
         >
-          <Title level={4} style={{ margin: 0, color: "#ffffff" }}>
-            {/* Dashboard */}
+          <Title level={4} style={{ margin: 0, color: colors.textColor }}>
+            Dashboard
           </Title>
 
           <Dropdown
@@ -173,8 +182,8 @@ const [colors, setColors] = useState({
                 cursor: "pointer",
               }}
             >
-              <UserOutlined style={{ fontSize: 18, color: "#ffffff" }} />
-              <span style={{ color: "#ffffff" }}>
+              <UserOutlined style={{ fontSize: 18, color: colors.textColor }} />
+              <span style={{ color: colors.textColor }}>
                 {location.state.name || "Guest"}
               </span>
             </div>
@@ -200,10 +209,22 @@ const [colors, setColors] = useState({
           <div
             style={{
               position: "relative",
-              height: "70%", // Adjust height as needed
-              width: "100%",
+              height: "100%",
             }}
           >
+            {/* <MapContainer
+              center={[51.505, -0.09]} // Center the map at a default location (London)
+              zoom={13}
+              style={{ height: "100%", borderRadius: 10 }}
+              zoomControl={false} // Disable default zoom control, we will add custom controls
+            >
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              <ZoomControl position="topright" /> {/* Custom zoom control 
+              <Marker position={[51.505, -0.09]}>
+                <Popup>Dummy location</Popup>
+              </Marker>
+            </MapContainer> */}
+
             <MapWithGeoJSON />
 
             {/* Fullscreen toggle button */}
