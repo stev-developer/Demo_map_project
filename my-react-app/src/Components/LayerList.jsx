@@ -136,8 +136,8 @@ useEffect(() => {
         borderRadius: "4px",
         boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
         zIndex: 1000,
-        maxWidth: "250px",
-        maxHeight: "50vh",
+        maxWidth: "230px",
+        maxHeight: "40vh",
         overflowY: "auto",
       }}
     >
