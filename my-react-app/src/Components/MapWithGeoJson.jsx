@@ -152,7 +152,7 @@ const MapWithGeoJSON = () => {
   <div
     style={{
       position: "absolute",
-      bottom: "30%",
+      bottom: "20%",
       left: "2%",
       zIndex: 1000,
       width: "90%",
@@ -176,7 +176,7 @@ const MapWithGeoJSON = () => {
   <div
     style={{
       position: "absolute",
-      bottom: "30%",
+      bottom: "20%",
       right: "2%",
       zIndex: 1000,
       width: "90%",

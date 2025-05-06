@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Style, Fill, Stroke } from "ol/style";
-import { Checkbox, Collapse } from "antd";
-
-const { Panel } = Collapse;
+import { Checkbox } from "antd";
 
 const LayerList = ({ map }) => {
   const [layers, setLayers] = useState([]);
   const [zoneChecked, setZoneChecked] = useState(true);
-  const [buildingLayerIndex, setBuildingLayerIndex] = useState(null);
+  const [buildingLayerId, setBuildingLayerId] = useState(null);
   const [buildingTypes, setBuildingTypes] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [buildingLayerVisible, setBuildingLayerVisible] = useState(true);
@@ -37,47 +35,53 @@ const LayerList = ({ map }) => {
     });
   };
 
-  useEffect(() => {
-    if (!map) return;
+useEffect(() => {
+  if (!map) return;
 
-    const updateLayers = () => {
-      const allLayers = map.getLayers().getArray();
-      const vectorLayers = allLayers.filter(
-        (layer, idx) => idx > 0 && layer.getSource
-      );
+  const updateLayers = () => {
+    const allLayers = map.getLayers().getArray();
+    const vectorLayers = allLayers.filter(
+      (layer, idx) => idx > 0 && layer.getSource
+    );
 
-      const layerData = vectorLayers.map((layer, idx) => ({
-        title: layer.get("title") || `Layer ${idx + 1}`,
+    const layerData = vectorLayers.map((layer, idx) => {
+      const title = layer.get("title") || `Layer ${idx + 1}`;
+      const id = layer.ol_uid || `${title}_${idx}`;
+      return {
+        id,
+        title,
         visible: layer.getVisible(),
         layer,
-      }));
+      };
+    });
 
-      setLayers(layerData);
-      setZoneChecked(layerData.every((l) => l.visible));
+    setLayers(layerData);
+    setZoneChecked(layerData.every((l) => l.visible));
 
-      const buildingIndex = layerData.findIndex((l) =>
-        l.title.toLowerCase().includes("building")
+    // ✅ Only identify exact building layer
+    const buildingLayer = layerData.find(
+      (l) => l.title.toLowerCase() === "building"
+    );
+
+    if (buildingLayer) {
+      const features = buildingLayer.layer.getSource().getFeatures();
+      const types = Array.from(
+        new Set(features.map((f) => f.get("name")).filter(Boolean))
       );
-      setBuildingLayerIndex(buildingIndex);
+      setBuildingTypes(types);
+      setSelectedTypes(types);
+      setBuildingLayerVisible(buildingLayer.visible);
+      setBuildingLayerId(buildingLayer.id);
+      applyBuildingStyles(types, buildingLayer.layer);
+    }
+  };
 
-      if (buildingIndex !== -1) {
-        const buildingLayer = layerData[buildingIndex].layer;
-        const features = buildingLayer.getSource().getFeatures();
-        const types = Array.from(
-          new Set(features.map((f) => f.get("name")).filter(Boolean))
-        );
-        setBuildingTypes(types);
-        setSelectedTypes(types);
-        setBuildingLayerVisible(buildingLayer.getVisible());
-        applyBuildingStyles(types, buildingLayer);
-      }
-    };
+  updateLayers();
+  const onAdd = () => updateLayers();
+  map.getLayers().on("add", onAdd);
+  return () => map.getLayers().un("add", onAdd);
+}, [map]);
 
-    updateLayers();
-    const onAdd = () => updateLayers();
-    map.getLayers().on("add", onAdd);
-    return () => map.getLayers().un("add", onAdd);
-  }, [map]);
 
   const toggleAllLayers = () => {
     const newVal = !zoneChecked;
@@ -89,47 +93,37 @@ const LayerList = ({ map }) => {
     });
 
     setLayers(updated);
-    if (buildingLayerIndex !== null) {
-      setBuildingLayerVisible(newVal);
-    }
+    setBuildingLayerVisible(newVal);
   };
 
-  const toggleLayerVisibility = (index) => {
-    const updated = [...layers];
-    updated[index].visible = !updated[index].visible;
-    updated[index].layer.setVisible(updated[index].visible);
+  const toggleLayerVisibility = (id) => {
+    const updated = layers.map((l) => {
+      if (l.id === id) {
+        const newVisible = !l.visible;
+        l.layer.setVisible(newVisible);
+
+        if (l.id === buildingLayerId) {
+          setBuildingLayerVisible(newVisible);
+        }
+
+        return { ...l, visible: newVisible };
+      }
+      return l;
+    });
+
     setLayers(updated);
     setZoneChecked(updated.every((l) => l.visible));
-
-    if (index === buildingLayerIndex) {
-      setBuildingLayerVisible(updated[index].visible);
-    }
-  };
-
-  console.log(layers, "layers");
-  
-
-  const toggleBuildingLayer = () => {
-    const index = buildingLayerIndex;
-    if (index === null) return;
-    const visible = !buildingLayerVisible;
-
-    const updated = [...layers];
-    updated[index].visible = visible;
-    updated[index].layer.setVisible(visible);
-    setBuildingLayerVisible(visible);
-    setZoneChecked(updated.every((l) => l.visible));
-    setLayers(updated);
   };
 
   const onChangeBuildingTypes = (checkedValues) => {
     setSelectedTypes(checkedValues);
 
-    if (buildingLayerIndex !== null) {
-      const layer = layers[buildingLayerIndex].layer;
-      layer.setVisible(checkedValues.length > 0);
-      setBuildingLayerVisible(checkedValues.length > 0);
-      applyBuildingStyles(checkedValues, layer);
+    const buildingLayer = layers.find((l) => l.id === buildingLayerId);
+    if (buildingLayer) {
+      const visible = checkedValues.length > 0;
+      buildingLayer.layer.setVisible(visible);
+      setBuildingLayerVisible(visible);
+      applyBuildingStyles(checkedValues, buildingLayer.layer);
     }
   };
 
@@ -157,55 +151,40 @@ const LayerList = ({ map }) => {
         </div>
 
         <div style={{ marginTop: 10 }}>
-          {/* Sort layers by title */}
-          {(() => {
-            const sortedLayers = [...layers].sort((a, b) =>
-              a.title.localeCompare(b.title)
-            );
-            return (
-              <>
-                {/* Render each layer */}
-                {sortedLayers.map((l, i) => (
-                  <div key={i} style={{ marginTop: 5, marginLeft: 20 }}>
-                    <Checkbox
-                      checked={l.visible}
-                      onChange={() => toggleLayerVisibility(i)}
-                    >
-                      {l.title}
-                    </Checkbox>
+          {[...layers]
+            .sort((a, b) => a.title.localeCompare(b.title))
+            .map((l) => (
+              <div key={l.id} style={{ marginTop: 5, marginLeft: 20 }}>
+                <Checkbox
+                  checked={l.visible}
+                  onChange={() => toggleLayerVisibility(l.id)}
+                >
+                  {l.title}
+                </Checkbox>
 
-                    {/* Conditionally render a div if the title contains 'building' */}
-                    {l.title.toLowerCase().includes("building") && (
-                      <div style={{  marginLeft: 20 }}>
-                        {buildingLayerIndex !== null && (
-                          <>
-                            {buildingTypes.length > 0 &&
-                              buildingLayerVisible && (
-                                <Checkbox.Group
-                                  value={selectedTypes}
-                                  onChange={onChangeBuildingTypes}
-                                  style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: 5,
-                                  }}
-                                >
-                                  {buildingTypes.map((type) => (
-                                    <Checkbox key={type} value={type}>
-                                      <span>{type}</span>
-                                    </Checkbox>
-                                  ))}
-                                </Checkbox.Group>
-                              )}
-                          </>
-                        )}
-                      </div>
+                {l.id === buildingLayerId && (
+                  <div style={{ marginLeft: 20 }}>
+                    {buildingTypes.length > 0 && buildingLayerVisible && (
+                      <Checkbox.Group
+                        value={selectedTypes}
+                        onChange={onChangeBuildingTypes}
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 5,
+                        }}
+                      >
+                        {buildingTypes.map((type) => (
+                          <Checkbox key={type} value={type}>
+                            {type}
+                          </Checkbox>
+                        ))}
+                      </Checkbox.Group>
                     )}
                   </div>
-                ))}
-              </>
-            );
-          })()}
+                )}
+              </div>
+            ))}
         </div>
       </div>
     </div>
