@@ -163,6 +163,10 @@ const LayerList = ({ map }) => {
         zIndex: 1000,
         maxWidth: "250px",
         fontSize: "14px",
+        border: "1px solid #ccc",
+        borderRadius: "4px",
+        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+        overflowY: "auto",
       }}
     >
       <strong>Layer List</strong>

@@ -96,8 +96,8 @@ const Legend = ({ map }) => {
     <div
       style={{
         position: "absolute",
-        bottom: "20px",
-        right: "20px",
+        bottom: "10px",
+        right: "720px",
         background: "white",
         padding: "10px",
         border: "1px solid #ccc",
