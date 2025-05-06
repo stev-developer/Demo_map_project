@@ -18,6 +18,8 @@ import { FaExpandAlt, FaCompressAlt } from "react-icons/fa";
 
 import "leaflet/dist/leaflet.css";
 
+import MapWithGeoJSON from "./MapWithGeoJson";
+
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
 
@@ -48,18 +50,15 @@ const Dashboard = () => {
     }
   };
 
-const getGreeting = () => {
-  const hour = new Date().getHours();
-  const name = location.state?.name || "Guest"; 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    const name = location.state?.name || "Guest";
 
-  if (hour < 12) return `Good Morning, ${name}`;
-  if (hour < 18) return `Good Afternoon, ${name}`;
-  if (hour < 21) return `Good Evening, ${name}`; // Optional: 9 PM to 11:59 PM
-  return `Good Night, ${name}`; // After 9 PM
-};
-
-
-
+    if (hour < 12) return `Good Morning, ${name}`;
+    if (hour < 18) return `Good Afternoon, ${name}`;
+    if (hour < 21) return `Good Evening, ${name}`; // Optional: 9 PM to 11:59 PM
+    return `Good Night, ${name}`; // After 9 PM
+  };
 
   const profileMenu = (
     <Menu onClick={handleMenuClick}>
@@ -83,7 +82,6 @@ const getGreeting = () => {
   const toggleFullScreen = () => {
     setIsFullScreen(!isFullScreen);
   };
-
 
   return (
     <Layout
@@ -203,18 +201,20 @@ const getGreeting = () => {
               height: isFullScreen ? "100vh" : "400px",
             }}
           >
-            <MapContainer
+            {/* <MapContainer
               center={[51.505, -0.09]} // Center the map at a default location (London)
               zoom={13}
               style={{ height: "100%", borderRadius: 10 }}
               zoomControl={false} // Disable default zoom control, we will add custom controls
             >
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <ZoomControl position="topright" /> {/* Custom zoom control */}
+              <ZoomControl position="topright" /> {/* Custom zoom control 
               <Marker position={[51.505, -0.09]}>
                 <Popup>Dummy location</Popup>
               </Marker>
-            </MapContainer>
+            </MapContainer> */}
+
+            <MapWithGeoJSON />
 
             {/* Fullscreen toggle button */}
             <button
