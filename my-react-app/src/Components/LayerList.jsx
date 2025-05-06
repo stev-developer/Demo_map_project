@@ -152,48 +152,62 @@ const LayerList = ({ map }) => {
 
         <div style={{ marginTop: 10 }}>
           <Checkbox checked={zoneChecked} onChange={toggleAllLayers}>
-            Toggle All Layers
+            Zone
           </Checkbox>
         </div>
 
-        {layers.map((l, i) => (
-          <div key={i} style={{ marginTop: 5 }}>
-            <Checkbox
-              checked={l.visible}
-              onChange={() => toggleLayerVisibility(i)}
-            >
-              {l.title}
-            </Checkbox>
-          </div>
-        ))}
-      </div>
-
-      {buildingLayerIndex !== null && (
-        <>
-          {buildingTypes.length > 0 && buildingLayerVisible && (
-            <Collapse
-              ghost
-              bordered={false}
-              defaultActiveKey={["1"]}
-              style={{ marginTop: 10 }}
-            >
-              <Panel header="Building Types" key="1">
-                <Checkbox.Group
-                  value={selectedTypes}
-                  onChange={onChangeBuildingTypes}
-                  style={{ display: "flex", flexDirection: "column", gap: 5 }}
-                >
-                  {buildingTypes.map((type) => (
-                    <Checkbox key={type} value={type}>
-                      <span>{type}</span>
+        <div style={{ marginTop: 10 }}>
+          {/* Sort layers by title */}
+          {(() => {
+            const sortedLayers = [...layers].sort((a, b) =>
+              a.title.localeCompare(b.title)
+            );
+            return (
+              <>
+                {/* Render each layer */}
+                {sortedLayers.map((l, i) => (
+                  <div key={i} style={{ marginTop: 5, marginLeft: 20 }}>
+                    <Checkbox
+                      checked={l.visible}
+                      onChange={() => toggleLayerVisibility(i)}
+                    >
+                      {l.title}
                     </Checkbox>
-                  ))}
-                </Checkbox.Group>
-              </Panel>
-            </Collapse>
-          )}
-        </>
-      )}
+
+                    {/* Conditionally render a div if the title contains 'building' */}
+                    {l.title.toLowerCase().includes("building") && (
+                      <div style={{  marginLeft: 20 }}>
+                        {buildingLayerIndex !== null && (
+                          <>
+                            {buildingTypes.length > 0 &&
+                              buildingLayerVisible && (
+                                <Checkbox.Group
+                                  value={selectedTypes}
+                                  onChange={onChangeBuildingTypes}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: 5,
+                                  }}
+                                >
+                                  {buildingTypes.map((type) => (
+                                    <Checkbox key={type} value={type}>
+                                      <span>{type}</span>
+                                    </Checkbox>
+                                  ))}
+                                </Checkbox.Group>
+                              )}
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </>
+            );
+          })()}
+        </div>
+      </div>
     </div>
   );
 };
