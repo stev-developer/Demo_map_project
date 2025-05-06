@@ -93,7 +93,7 @@ const Login = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background: "#f5f7fa", // Light gray background for a professional look
+        background: "linear-gradient(135deg, #e0f7fa, #ffffff)", // Soft blue to white gradient
       }}
     >
       <Card

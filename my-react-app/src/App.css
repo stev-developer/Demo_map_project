@@ -5,6 +5,15 @@
   text-align: center;
 }
 
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+h1, p {
+  font-family: 'Poppins', sans-serif;
+}
+
+
 .logo {
   height: 6em;
   padding: 1.5em;
