@@ -209,22 +209,10 @@ const [colors, setColors] = useState({
           <div
             style={{
               position: "relative",
-              height: isFullScreen ? "100vh" : "400px",
+              height: "100vh",
             }}
           >
-            {/* <MapContainer
-              center={[51.505, -0.09]} // Center the map at a default location (London)
-              zoom={13}
-              style={{ height: "100%", borderRadius: 10 }}
-              zoomControl={false} // Disable default zoom control, we will add custom controls
-            >
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <ZoomControl position="topright" /> {/* Custom zoom control 
-              <Marker position={[51.505, -0.09]}>
-                <Popup>Dummy location</Popup>
-              </Marker>
-            </MapContainer> */}
-
+        
             <MapWithGeoJSON />
 
             {/* Fullscreen toggle button */}
