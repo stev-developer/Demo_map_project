@@ -27,17 +27,20 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [colors, setColors] = useState({
-    sidebarBackground: "#ffffff",
-    sidebarItemColor: "#07090F",
-    sidebarItemBGColor: "#f5f5f5",
-    sidebarItemSelectedBGColor: "#e0e0e0",
-    textColor: "#07090F",
-    buttonColor: "#1890ff",
-    headerBackground: "#ffffff",
-    contentBackground: "#ffffff",
-    borderColor: "#f0f0f0",
-  });
+const [colors, setColors] = useState({
+  sidebarBackground: "#ffffff", // white sidebar
+  sidebarItemColor: "#07090F", // unselected text color
+  sidebarItemBGColor: "#f5f5f5", // unselected background
+  sidebarItemSelectedBGColor: "#1890ff", // blue selected item
+  sidebarItemSelectedColor: "#ffffff", // white selected text
+  textColor: "#07090F",
+  buttonColor: "#1890ff",
+  headerBackground: "#ffffff",
+  contentBackground: "#ffffff",
+  borderColor: "#f0f0f0",
+});
+
+
 
   const [selectedKey, setSelectedKey] = useState("1");
 
@@ -124,14 +127,22 @@ const Dashboard = () => {
             <Menu.Item
               key={key}
               icon={React.cloneElement(icon, {
-                style: { color: colors.sidebarItemColor },
+                style: {
+                  color:
+                    selectedKey === key
+                      ? colors.sidebarItemSelectedColor // white for selected icon
+                      : colors.sidebarItemColor, // default icon color
+                },
               })}
               style={{
                 backgroundColor:
                   selectedKey === key
                     ? colors.sidebarItemSelectedBGColor
                     : colors.sidebarItemBGColor,
-                color: colors.sidebarItemColor,
+                color:
+                  selectedKey === key
+                    ? colors.sidebarItemSelectedColor // white text for selected
+                    : colors.sidebarItemColor, // default text color
               }}
             >
               {label}

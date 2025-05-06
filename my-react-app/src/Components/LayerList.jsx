@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Style, Fill, Stroke } from "ol/style";
+import { Checkbox, Collapse } from "antd";
+
+const { Panel } = Collapse;
 
 const LayerList = ({ map }) => {
   const [layers, setLayers] = useState([]);
@@ -7,7 +10,6 @@ const LayerList = ({ map }) => {
   const [buildingLayerIndex, setBuildingLayerIndex] = useState(null);
   const [buildingTypes, setBuildingTypes] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([]);
-  const [allTypesChecked, setAllTypesChecked] = useState(true);
   const [buildingLayerVisible, setBuildingLayerVisible] = useState(true);
 
   const getColorForType = (type) => {
@@ -66,7 +68,6 @@ const LayerList = ({ map }) => {
         );
         setBuildingTypes(types);
         setSelectedTypes(types);
-        setAllTypesChecked(true);
         setBuildingLayerVisible(buildingLayer.getVisible());
         applyBuildingStyles(types, buildingLayer);
       }
@@ -105,12 +106,15 @@ const LayerList = ({ map }) => {
     }
   };
 
+  console.log(layers, "layers");
+  
+
   const toggleBuildingLayer = () => {
-    const updated = [...layers];
     const index = buildingLayerIndex;
     if (index === null) return;
     const visible = !buildingLayerVisible;
 
+    const updated = [...layers];
     updated[index].visible = visible;
     updated[index].layer.setVisible(visible);
     setBuildingLayerVisible(visible);
@@ -118,129 +122,78 @@ const LayerList = ({ map }) => {
     setLayers(updated);
   };
 
-  const toggleBuildingType = (type) => {
-    let updated;
-    if (selectedTypes.includes(type)) {
-      updated = selectedTypes.filter((t) => t !== type);
-    } else {
-      updated = [...selectedTypes, type];
-    }
-
-    setSelectedTypes(updated);
-    setAllTypesChecked(updated.length === buildingTypes.length);
+  const onChangeBuildingTypes = (checkedValues) => {
+    setSelectedTypes(checkedValues);
 
     if (buildingLayerIndex !== null) {
       const layer = layers[buildingLayerIndex].layer;
-      layer.setVisible(updated.length > 0);
-      setBuildingLayerVisible(updated.length > 0);
-      applyBuildingStyles(updated, layer);
-    }
-  };
-
-  const toggleAllBuildingTypes = () => {
-    const newChecked = !allTypesChecked;
-    const updated = newChecked ? [...buildingTypes] : [];
-    setAllTypesChecked(newChecked);
-    setSelectedTypes(updated);
-
-    if (buildingLayerIndex !== null) {
-      const layer = layers[buildingLayerIndex].layer;
-      layer.setVisible(newChecked);
-      setBuildingLayerVisible(newChecked);
-      applyBuildingStyles(updated, layer);
+      layer.setVisible(checkedValues.length > 0);
+      setBuildingLayerVisible(checkedValues.length > 0);
+      applyBuildingStyles(checkedValues, layer);
     }
   };
 
   return (
     <div
       style={{
-        position: "absolute",
-        top: "10px",
-        right: "10px",
         background: "white",
         padding: "10px",
         border: "1px solid #ccc",
-        zIndex: 1000,
-        maxWidth: "250px",
-        fontSize: "14px",
-        border: "1px solid #ccc",
         borderRadius: "4px",
         boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+        zIndex: 1000,
+        maxWidth: "250px",
+        maxHeight: "50vh",
         overflowY: "auto",
       }}
     >
-      <strong>Layer List</strong>
-      <ul style={{ listStyle: "none", paddingLeft: 0 }}>
-        <li>
-          <label>
-            <input
-              type="checkbox"
-              checked={zoneChecked}
-              onChange={toggleAllLayers}
-            />{" "}
+      <div>
+        <strong>Layer List</strong>
+
+        <div style={{ marginTop: 10 }}>
+          <Checkbox checked={zoneChecked} onChange={toggleAllLayers}>
             Toggle All Layers
-          </label>
-        </li>
+          </Checkbox>
+        </div>
 
         {layers.map((l, i) => (
-          <li key={i}>
-            <label>
-              <input
-                type="checkbox"
-                checked={l.visible}
-                onChange={() => toggleLayerVisibility(i)}
-              />{" "}
+          <div key={i} style={{ marginTop: 5 }}>
+            <Checkbox
+              checked={l.visible}
+              onChange={() => toggleLayerVisibility(i)}
+            >
               {l.title}
-            </label>
-          </li>
+            </Checkbox>
+          </div>
         ))}
+      </div>
 
-        {buildingLayerIndex !== null && (
-          <>
-            <li>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={buildingLayerVisible}
-                  onChange={toggleBuildingLayer}
-                />{" "}
-                Building
-              </label>
-            </li>
-            {buildingTypes.length > 0 && (
-              <li>
-                <strong>Building Types</strong>
-                <ul style={{ listStyle: "none", paddingLeft: "10px" }}>
-                  <li key="toggle-all">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={allTypesChecked}
-                        onChange={toggleAllBuildingTypes}
-                      />{" "}
-                      All Building Types
-                    </label>
-                  </li>
-                  {buildingTypes.map((type, i) => (
-                    <li key={i}>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={selectedTypes.includes(type)}
-                          onChange={() => toggleBuildingType(type)}
-                        />{" "}
-                        <span style={{ color: getColorForType(type) }}>
-                          {type}
-                        </span>
-                      </label>
-                    </li>
+      {buildingLayerIndex !== null && (
+        <>
+          {buildingTypes.length > 0 && buildingLayerVisible && (
+            <Collapse
+              ghost
+              bordered={false}
+              defaultActiveKey={["1"]}
+              style={{ marginTop: 10 }}
+            >
+              <Panel header="Building Types" key="1">
+                <Checkbox.Group
+                  value={selectedTypes}
+                  onChange={onChangeBuildingTypes}
+                  style={{ display: "flex", flexDirection: "column", gap: 5 }}
+                >
+                  {buildingTypes.map((type) => (
+                    <Checkbox key={type} value={type}>
+                      <span>{type}</span>
+                    </Checkbox>
                   ))}
-                </ul>
-              </li>
-            )}
-          </>
-        )}
-      </ul>
+                </Checkbox.Group>
+              </Panel>
+            </Collapse>
+          )}
+        </>
+      )}
     </div>
   );
 };

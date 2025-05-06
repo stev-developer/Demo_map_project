@@ -127,12 +127,76 @@ const MapWithGeoJSON = () => {
   }, []);
 
   return (
-    <div>
-      <div ref={mapContainerRef} style={{ width: "100%", height: "100vh" }} />
-      <div ref={popupRef} className="ol-popup"></div>
-      {map && <LayerList map={map} />}
+  <div style={{ position: "relative", width: "100%", height: "100vh" }}>
+  {/* Fullscreen Map */}
+  <div
+    ref={mapContainerRef}
+    style={{
+      width: "100%",
+      height: "100vh",
+      position: "absolute",
+      top: 0,
+      left: 0,
+      zIndex: 0,
+    }}
+  />
+
+  {/* Popup */}
+  <div
+    ref={popupRef}
+    className="ol-popup"
+    style={{ zIndex: 2, marginTop: "1rem" }}
+  />
+
+  {/* Left Overlay Box (Legend) */}
+  <div
+    style={{
+      position: "absolute",
+      top: "10%",
+      left: "2%",
+      zIndex: 1000,
+      width: "90%",
+      maxWidth: "300px",
+      maxHeight: "40vh",
+    }}
+  >
+    <div
+      className="ant-card"
+      style={{
+        padding: "1rem",
+        borderRadius: "8px",
+        height: "100%",
+      }}
+    >
       {map && <Legend map={map} />}
     </div>
+  </div>
+
+  {/* Right Overlay Box (LayerList) */}
+  <div
+    style={{
+      position: "absolute",
+      top: "10%",
+      right: "2%",
+      zIndex: 1000,
+      width: "90%",
+      maxWidth: "300px",
+      maxHeight: "40vh",
+    }}
+  >
+    <div
+      className="ant-card"
+      style={{
+        padding: "1rem",
+        borderRadius: "8px",
+        height: "100%",
+      }}
+    >
+      {map && <LayerList map={map} />}
+    </div>
+  </div>
+</div>
+
   );
 };
 
