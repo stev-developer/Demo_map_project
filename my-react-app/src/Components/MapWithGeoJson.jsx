@@ -16,7 +16,7 @@ import Overlay from "ol/Overlay";
 import LayerList from "./LayerList";
 import Legend from "./Legend";
 import ScaleLine from "ol/control/ScaleLine";
-
+import XYZ from "ol/source/XYZ";
 const MapWithGeoJSON = () => {
   const mapContainerRef = useRef();
   const popupRef = useRef();
@@ -40,14 +40,22 @@ const MapWithGeoJSON = () => {
       minWidth: 100,
     });
 
+    // ESRI Satellite Layer
+    const satelliteLayer = new TileLayer({
+      source: new XYZ({
+        url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        attributions: "Tiles © Esri",
+      }),
+    });
+
+    // new TileLayer({
+    //   source: new OSM(),
+    // }),
+
     // Initialize the map
     const mapInstance = new Map({
       target: mapContainerRef.current,
-      layers: [
-        new TileLayer({
-          source: new OSM(),
-        }),
-      ],
+      layers: [satelliteLayer],
       overlays: [overlay],
       controls: [scaleLine], // Add scale line to map controls
       view: new View({
@@ -127,76 +135,75 @@ const MapWithGeoJSON = () => {
   }, []);
 
   return (
-  <div style={{ position: "relative", width: "100%", height: "100vh" }}>
-  {/* Fullscreen Map */}
-  <div
-    ref={mapContainerRef}
-    style={{
-      width: "100%",
-      height: "100vh",
-      position: "absolute",
-      top: 0,
-      left: 0,
-      zIndex: 0,
-    }}
-  />
+    <div style={{ position: "relative", width: "100%", height: "100vh" }}>
+      {/* Fullscreen Map */}
+      <div
+        ref={mapContainerRef}
+        style={{
+          width: "100%",
+          height: "100vh",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          zIndex: 0,
+        }}
+      />
 
-  {/* Popup */}
-  <div
-    ref={popupRef}
-    className="ol-popup"
-    style={{ zIndex: 2, marginTop: "1rem" }}
-  />
+      {/* Popup */}
+      <div
+        ref={popupRef}
+        className="ol-popup"
+        style={{ zIndex: 2, marginTop: "1rem" }}
+      />
 
-  {/* Left Overlay Box (Legend) */}
-  <div
-    style={{
-      position: "absolute",
-      bottom: "10%",
-      left: "0%",
-      zIndex: 1000,
-      width: "90%",
-      maxWidth: "300px",
-      maxHeight: "40vh",
-    }}
-  >
-    <div
-      className="ant-card"
-      style={{
-        padding: "1rem",
-        borderRadius: "8px",
-        height: "100%",
-      }}
-    >
-      {map && <Legend map={map} />}
+      {/* Left Overlay Box (Legend) */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "10%",
+          left: "0%",
+          zIndex: 1000,
+          width: "90%",
+          maxWidth: "300px",
+          maxHeight: "40vh",
+        }}
+      >
+        <div
+          className="ant-card"
+          style={{
+            padding: "1rem",
+            borderRadius: "8px",
+            height: "100%",
+          }}
+        >
+          {map && <Legend map={map} />}
+        </div>
+      </div>
+
+      {/* Right Overlay Box (LayerList) */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "4%",
+          right: "-3%",
+          zIndex: 1000,
+          width: "90%",
+          maxWidth: "300px",
+          maxHeight: "40vh",
+        }}
+      >
+        <div
+          className="ant-card"
+          style={{
+            padding: "1rem",
+            borderRadius: "8px",
+            height: "100%",
+          }}
+        >
+          {map && <LayerList map={map} />}
+        </div>
+      </div>
     </div>
-  </div>
-
-  {/* Right Overlay Box (LayerList) */}
-  <div
-    style={{
-      position: "absolute",
-      bottom: "4%",
-      right: "-3%",
-      zIndex: 1000,
-      width: "90%",
-      maxWidth: "300px",
-      maxHeight: "40vh",
-    }}
-  >
-    <div
-      className="ant-card"
-      style={{
-        padding: "1rem",
-        borderRadius: "8px",
-        height: "100%",
-      }}
-    >
-      {map && <LayerList map={map} />}
-    </div>
-  </div>
-</div>
-
   );
 };
 
